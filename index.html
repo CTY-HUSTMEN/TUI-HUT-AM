@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>TÚI HÚT ẨM</title>
+<title>TÚI TỎA HƯƠNG</title>
 
 <link rel="icon" href="logo.png">
 
@@ -127,6 +127,19 @@ button:hover {
     object-fit: cover;
 }
 
+button:hover{background:#e68900}
+
+.stock{
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.warning{
+    color:red;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
 /* Common float animation */
 @keyframes floatSmooth {
     0% { transform: translate3d(0, 0px, 0) rotate(0deg); }
@@ -221,88 +234,135 @@ button:hover {
 <div class="wrapper">
 <div class="container">
 
-    <!-- STEP 1 -->
 <!-- STEP 1 -->
-    <div id="step1">
-        <img src="logo.png" class="logo">
-        <div class="title">HUST MEN</div>
-        <p style="font-weight:bold; margin-bottom:10px;">TÚI HÚT ẨM</p>
+<div id="step1">
+    <img src="logo.png" class="logo">
+    <div class="title">HUST MEN</div>
+    <p style="font-weight:bold;margin-bottom:10px;">TÚI HÚT ẨM</p>
 
-        <button onclick="goStep(2, 'gift')">QUÀ TẶNG</button>
-        <br><br>
-        <button onclick="goStep(2, 'buy')">MUA</button>
-    </div>
+    <button onclick="goStep(2,'gift')">QUÀ TẶNG</button>
+    <br><br>
+    <button onclick="goStep(2,'buy')">MUA</button>
+</div>
 
-    <!-- STEP 2 -->
-    <div id="step2" style="display:none;">
-        <p class="instruction" id="stepTitle"></p>
+<!-- STEP 2 -->
+<div id="step2" style="display:none;">
 
-        <p style="font-weight:bold; margin-bottom:10px;">TÚI HÚT ẨM</p>
+    <p id="stepTitle"></p>
 
-        <!-- 🔥 THÊM CHỌN QUẦY -->
-        <select id="counter">
-            <option value="">-- Chọn quầy --</option>
-            <option value="A">Quầy A</option>
-            <option value="B">Quầy B</option>
-        </select>
+    <p style="font-weight:bold;margin-bottom:10px;">TÚI HÚT ẨM</p>
 
-        <input type="number" id="quantity" placeholder="Số lượng" min="1" value="1">
+    <!-- 🔥 HIỂN THỊ TỒN KHO -->
+    <div class="stock" id="stockDisplay">Tồn kho: ...</div>
+    <div class="warning" id="stockWarning"></div>
 
-        <button onclick="submitForm()">Xác nhận</button>
-    </div>
+    <select id="counter">
+        <option value="">-- Chọn quầy --</option>
+        <option value="A">Quầy A</option>
+        <option value="B">Quầy B</option>
+    </select>
+
+    <input type="number" id="quantity" min="1" value="1">
+
+    <button onclick="submitForm()">Xác nhận</button>
 
 </div>
 </div>
 
 <script>
-let type = "";
-const ITEM_NAME = "TÚI HÚT ẨM"; // mỗi file đổi cái này
 
-function goStep(step, selectedType = ""){
+let type = "";
+const ITEM_NAME = "TÚI HÚT ẨM";
+
+// ⚠️ URL API của bạn
+const API_URL = "https://script.google.com/macros/s/AKfycbyhOEhWmoVJYIET_2H0s02BSFXD0GogCtB7TufKnbLz9o-d2GoCjzj6h6v35aqbTwlI/exec";
+
+function goStep(step, selectedType=""){
     if(selectedType) type = selectedType;
 
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").style.display = "none";
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="none";
 
-    document.getElementById("step" + step).style.display = "block";
+    document.getElementById("step"+step).style.display="block";
 
-    if(step === 2){
+    if(step===2){
         document.getElementById("stepTitle").innerText =
-            type === "gift" ? "Nhận quà" : "Mua sản phẩm";
+            type==="gift" ? "Nhận quà" : "Mua sản phẩm";
+
+        loadStock(); // 🔥 load tồn kho
     }
 }
 
 function resetForm(){
-    document.getElementById("quantity").value = 1;
-    document.getElementById("counter").value = "";
-    type = "";
+    document.getElementById("quantity").value=1;
+    document.getElementById("counter").value="";
+    type="";
     goStep(1);
 }
 
+// =====================
+// 🔥 LẤY TỒN KHO
+// =====================
+function loadStock(){
+
+    fetch(API_URL + "?action=getStock&item=" + encodeURIComponent(ITEM_NAME))
+    .then(res=>res.json())
+    .then(data=>{
+
+        let stock = data.stock || 0;
+
+        document.getElementById("stockDisplay").innerText =
+            "Tồn kho: " + stock;
+
+        if(stock <= 100){
+            document.getElementById("stockWarning").innerText =
+                "Sản phẩm chỉ còn lại " + stock + ", sắp hết hàng!";
+        }else{
+            document.getElementById("stockWarning").innerText="";
+        }
+
+        // 🔥 hết hàng thì khóa nút
+        if(stock <= 0){
+            document.querySelector("button").disabled = true;
+            document.querySelector("button").innerText = "Hết hàng";
+        }
+
+    })
+    .catch(err=>{
+        document.getElementById("stockDisplay").innerText="Không lấy được tồn kho";
+    });
+}
+
+// =====================
+// SUBMIT
+// =====================
 function submitForm(){
 
     let quantity = document.getElementById("quantity").value;
     let counter = document.getElementById("counter").value;
 
-    if(counter === ""){
+    if(counter===""){
         alert("Vui lòng chọn quầy");
         return;
     }
 
-    fetch("https://script.google.com/macros/s/AKfycbym3p-MCrACIkS6QRfUI2unGplWKM3IJ3rEVsSOMWaDLGErQgRdIXhloQKw1ThgJcXy/exec"
+    fetch(API_URL
         + "?type=" + type
-        + "&item=" + ITEM_NAME
+        + "&item=" + encodeURIComponent(ITEM_NAME)
         + "&quantity=" + quantity
         + "&counter=" + counter,
     {
-        method: "GET",
-        mode: "no-cors"
+        method:"GET",
+        mode:"no-cors"
     });
 
-    setTimeout(() => {
+    // 🔥 cập nhật tồn kho lại sau khi gửi
+    setTimeout(()=>{
+        loadStock();
         resetForm();
-    }, 500);
+    },500);
 }
+
 </script>
 
 </body>
