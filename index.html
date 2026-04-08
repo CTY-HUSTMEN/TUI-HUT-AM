@@ -294,7 +294,7 @@ function goStep(step, selectedType=""){
         loadStock();
 
         // 🔥 thêm dòng này
-        stockInterval = setInterval(loadStock, 3000); // 3 giây cập nhật 1 lần
+        stockInterval = setInterval(loadStock, 1500); // 3 giây cập nhật 1 lần
     } else {
         clearInterval(stockInterval);
     }
