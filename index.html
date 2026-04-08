@@ -275,7 +275,9 @@ let type = "";
 const ITEM_NAME = "TÚI HÚT ẨM";
 
 // ⚠️ URL API của bạn
-const API_URL = "https://script.google.com/macros/s/AKfycbyhOEhWmoVJYIET_2H0s02BSFXD0GogCtB7TufKnbLz9o-d2GoCjzj6h6v35aqbTwlI/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzI9EB_jJfIVFqEq5zkMF8VHcRwUx7lJbtZpRxUiN5yaM1ZrEX-wVhSwgPJf68E5Hmb/exec";
+
+let stockInterval;
 
 function goStep(step, selectedType=""){
     if(selectedType) type = selectedType;
@@ -289,7 +291,12 @@ function goStep(step, selectedType=""){
         document.getElementById("stepTitle").innerText =
             type==="gift" ? "Nhận quà" : "Mua sản phẩm";
 
-        loadStock(); // 🔥 load tồn kho
+        loadStock();
+
+        // 🔥 thêm dòng này
+        stockInterval = setInterval(loadStock, 3000); // 3 giây cập nhật 1 lần
+    } else {
+        clearInterval(stockInterval);
     }
 }
 
@@ -353,7 +360,7 @@ function submitForm(){
         + "&counter=" + counter,
     {
         method:"GET",
-        mode:"no-cors"
+        //mode:"no-cors"
     });
 
     // 🔥 cập nhật tồn kho lại sau khi gửi
