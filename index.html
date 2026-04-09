@@ -345,11 +345,21 @@ function loadStock(){
 // =====================
 function submitForm(){
 
+    let btn = document.querySelector("#step2 button"); // lấy đúng nút Xác nhận
+
+    // 🔒 nếu đang xử lý thì không cho bấm tiếp
+    if(btn.disabled) return;
+
+    btn.disabled = true;
+    btn.innerText = "Đang xử lý...";
+
     let quantity = Number(document.getElementById("quantity").value);
     let counter = document.getElementById("counter").value;
 
     if(counter===""){
         alert("Vui lòng chọn quầy");
+        btn.disabled = false;
+        btn.innerText = "Xác nhận";
         return;
     }
 
@@ -364,21 +374,23 @@ function submitForm(){
 
         if(result === "NOT_ENOUGH_STOCK"){
             alert("Số lượng hàng trong kho không đủ");
-            return;
         }
-
-        if(result === "OK"){
-           // alert("Thành công");
-
+        else if(result === "OK"){
             loadStock();
             resetForm();
-        } else {
+        }
+        else{
             alert("Lỗi hệ thống: " + result);
         }
 
     })
     .catch(err => {
         alert("Không gửi được dữ liệu");
+    })
+    .finally(() => {
+        // 🔓 mở lại nút sau khi xong
+        btn.disabled = false;
+        btn.innerText = "Xác nhận";
     });
 }
 
