@@ -240,9 +240,9 @@ button:hover{background:#e68900}
     <div class="title">HUST MEN</div>
     <p style="font-weight:bold;margin-bottom:10px;">TÚI HÚT ẨM</p>
 
-    <button onclick="goStep(2,'gift')">QUÀ TẶNG</button>
+    <button id="btnGift" onclick="goStep(2,'gift')">QUÀ TẶNG</button>
     <br><br>
-    <button onclick="goStep(2,'buy')">MUA</button>
+    <button id="btnBuy" onclick="goStep(2,'buy')">MUA</button>
 </div>
 
 <!-- STEP 2 -->
@@ -323,7 +323,7 @@ function loadStock(){
 
         if(stock <= 100){
             document.getElementById("stockWarning").innerText =
-                "Sản phẩm chỉ còn lại " + stock + ", sắp hết hàng!";
+                "Sản phẩm chỉ còn lại " + stock;
         }else{
             document.getElementById("stockWarning").innerText="";
         }
@@ -331,7 +331,7 @@ function loadStock(){
         // 🔥 hết hàng thì khóa nút
         if(stock <= 0){
             document.querySelector("button").disabled = true;
-            document.querySelector("button").innerText = "Hết hàng";
+           // document.querySelector("button").innerText = "Hết hàng";
         }
 
     })
@@ -345,7 +345,7 @@ function loadStock(){
 // =====================
 function submitForm(){
 
-    let quantity = document.getElementById("quantity").value;
+    let quantity = Number(document.getElementById("quantity").value);
     let counter = document.getElementById("counter").value;
 
     if(counter===""){
@@ -357,17 +357,29 @@ function submitForm(){
         + "?type=" + type
         + "&item=" + encodeURIComponent(ITEM_NAME)
         + "&quantity=" + quantity
-        + "&counter=" + counter,
-    {
-        method:"GET",
-        //mode:"no-cors"
-    });
+        + "&counter=" + counter
+    )
+    .then(res => res.text())
+    .then(result => {
 
-    // 🔥 cập nhật tồn kho lại sau khi gửi
-    setTimeout(()=>{
-        loadStock();
-        resetForm();
-    },500);
+        if(result === "NOT_ENOUGH_STOCK"){
+            alert("Số lượng hàng trong kho không đủ");
+            return;
+        }
+
+        if(result === "OK"){
+           // alert("Thành công");
+
+            loadStock();
+            resetForm();
+        } else {
+            alert("Lỗi hệ thống: " + result);
+        }
+
+    })
+    .catch(err => {
+        alert("Không gửi được dữ liệu");
+    });
 }
 
 </script>
